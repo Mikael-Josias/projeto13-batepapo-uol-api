@@ -56,7 +56,16 @@ server.post("/participants", async (req, res) => {
     }
 
     res.send("OK");
-})
+});
+
+server.get("/participants", async (_, res) => {
+    try {
+        const data = await db.collection("participants").find().toArray();
+        res.send(data);
+    } catch (err) {
+        res.status(500).send("Desculpe! Tivemos um erro em nosso servidor!");
+    }
+});
 
 server.listen(5000, () => {
     console.log("Server Inicializado 🚀!!!");
