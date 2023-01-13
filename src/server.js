@@ -96,7 +96,7 @@ server.post("/messages", async (req, res) => {
             to,
             text,
             type,
-            time: dayjs(dayjs(), "HH:mm:ss"),
+            time: dayjs().format("HH:mm:ss"),
         };
 
         await db.collection("messages").insertOne(message);
@@ -107,7 +107,31 @@ server.post("/messages", async (req, res) => {
     }
 
     res.send("OK");
-})
+});
+
+server.get("/messages", async (req, res) => {
+    const {limit} = req.query;
+    const {user} = req.headers;
+
+    try {
+        const data = await db.collection("messages").find().toArray();
+        const newData = [];
+
+        //verifica se o usuário deveria ver as mensagens
+        for (let i = 0; i < data.length; i++) {
+            if (data[i].type === "message" || data[i].from === user || data[i].to === user) {
+               newData.push(data[i]);
+            }
+        }
+
+        //retorna até o número limite de mensagens
+        newData.reverse().splice(limit, newData.length - 1);
+
+        res.send(newData);
+    } catch (err) {
+        res.status(404).send("Houve um erro!");
+    }
+});
 
 server.listen(5000, () => {
     console.log("Server Inicializado 🚀!!!");
