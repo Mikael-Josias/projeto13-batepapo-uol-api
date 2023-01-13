@@ -133,6 +133,26 @@ server.get("/messages", async (req, res) => {
     }
 });
 
+server.post("/status", async (req, res) => {
+    const {user} = req.headers;
+
+    try {
+        //verifica se usuário está cadastrado
+        if (!await db.collection("participants").findOne({name : user})) {
+            return res.status(404).send("Usuário não foi encontrado");
+        }
+
+        //atualiza status
+        const lastStatus = dayjs().format("HH:mm:ss");
+        await db.collection("participants").updateOne({name: user}, {$set: lastStatus});
+
+        res.send("Usuário atualizado");
+    } catch (err) {
+        res.send("Houve um erro!");
+    }
+    res.send(user);
+});
+
 server.listen(5000, () => {
     console.log("Server Inicializado 🚀!!!");
 });
