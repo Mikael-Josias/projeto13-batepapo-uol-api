@@ -2,14 +2,21 @@ import express from "express";
 import cors from "cors";
 import { MongoClient } from "mongodb";
 import Joi from "joi";
+import dayjs from "dayjs";
 import dotenv from "dotenv";
 dotenv.config();
 
 //==================== INTERFACES ====================\\
 
-const schema = Joi.object({
+const schemaUser = Joi.object({
     name: Joi.string().min(3).max(15).required(),
-})
+});
+
+const schemaMessage = Joi.object({
+    to: Joi.string().required(),
+    text: Joi.string().required(),
+    type: Joi.string().valid("message","private_message").required(),
+});
 
 //==================== DATABASE ====================\\
 
@@ -34,7 +41,7 @@ server.post("/participants", async (req, res) => {
     const {name} = req.body;
 
     //verifica se o nome é vazio
-    if (schema.validate({name}).error) {
+    if (schemaUser.validate({name}).error) {
         return res.status(422).send("Usuário não pode ser vázio!");
     }
 
@@ -66,6 +73,41 @@ server.get("/participants", async (_, res) => {
         res.status(500).send("Desculpe! Tivemos um erro em nosso servidor!");
     }
 });
+
+server.post("/messages", async (req, res) => {
+    const {to, text, type} = req.body;
+    const {user} = req.headers;
+
+    //validar os dados vindos do body
+    if (schemaMessage.validate({to, text, type}).error) {
+        return res.status(422).send("Parametros da mensagem não opdem ser vazios!");
+    }
+
+    try {
+        //verificar se o usuário existe;
+
+        if (!await db.collection("participants").findOne({name: user})) {
+            return res.status(422).send("Usuário não existe");
+        }
+
+        //salvando a mensagem
+        const message = {
+            from: user,
+            to,
+            text,
+            type,
+            time: dayjs(dayjs(), "HH:mm:ss"),
+        };
+
+        await db.collection("messages").insertOne(message);
+
+        res.status(201).send("Mesagem postada!");
+    } catch (err) {
+        console.log("Ops! Algo deu errado!");
+    }
+
+    res.send("OK");
+})
 
 server.listen(5000, () => {
     console.log("Server Inicializado 🚀!!!");
