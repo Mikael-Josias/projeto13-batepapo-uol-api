@@ -56,8 +56,12 @@ server.post("/participants", async (req, res) => {
             name,
             lastStatus: Date.now(),
         }
-
+        
         await db.collection("participants").insertOne(newUser);
+
+        //cadastra mensagem de entrada
+        await db.collection("messages").insertOne({from: name, to: 'Todos', text: 'entra na sala...', type: 'status', time: dayjs().format("HH:mm:ss")});
+
     } catch (err) {
         console.log(err);
     }
