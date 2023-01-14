@@ -62,7 +62,7 @@ server.post("/participants", async (req, res) => {
         console.log(err);
     }
 
-    res.send("OK");
+    res.status(201).send("OK");
 });
 
 server.get("/participants", async (_, res) => {
