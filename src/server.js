@@ -1,6 +1,6 @@
 import express from "express";
 import cors from "cors";
-import { MongoClient } from "mongodb";
+import { MongoClient, ObjectId } from "mongodb";
 import Joi from "joi";
 import dayjs from "dayjs";
 import dotenv from "dotenv";
@@ -143,16 +143,36 @@ server.post("/status", async (req, res) => {
         }
 
         //atualiza status
-        const lastStatus = dayjs().format("HH:mm:ss");
-        await db.collection("participants").updateOne({name: user}, {$set: lastStatus});
+        const lastStatus = Date.now();
+        
+        const result = await db.collection("participants").updateOne({name: user}, {$set: {lastStatus}});
 
-        res.send("Usuário atualizado");
+        result.modifiedCount === 0 ? res.send("Não foi alterado") : res.send("Usuário atualizado");
+        
     } catch (err) {
+        console.log(err);
         res.send("Houve um erro!");
     }
-    res.send(user);
 });
 
 server.listen(5000, () => {
     console.log("Server Inicializado 🚀!!!");
 });
+
+//==================== DELETE OFFLINE USERS ====================\\
+
+setInterval(deleteUser, 15000);
+
+async function deleteUser(){
+    const users = await db.collection("participants").find().toArray();
+
+    try {
+        for (let i = 0; i < users.length; i++) {
+            if ((new Date().getTime() - new Date(users[i].lastStatus).getTime()) / 1000 > 10) {
+                await db.collection("participants").deleteOne({_id: ObjectId(users[i]._id)});
+            }
+        }
+    } catch (err) {
+        console.log(err);
+    }
+}
