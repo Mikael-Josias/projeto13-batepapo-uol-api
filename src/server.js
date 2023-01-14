@@ -123,7 +123,7 @@ server.get("/messages", async (req, res) => {
 
         //verifica se o usuário deveria ver as mensagens
         for (let i = 0; i < data.length; i++) {
-            if (data[i].type === "message" || data[i].from === user || data[i].to === user) {
+            if (data[i].type === "message" || data[i].type === "status" || data[i].from === user || data[i].to === user) {
                newData.push(data[i]);
             }
         }
