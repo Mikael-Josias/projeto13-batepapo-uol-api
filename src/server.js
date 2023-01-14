@@ -56,7 +56,7 @@ server.post("/participants", async (req, res) => {
             name,
             lastStatus: Date.now(),
         }
-        
+
         await db.collection("participants").insertOne(newUser);
 
         //cadastra mensagem de entrada
@@ -129,7 +129,7 @@ server.get("/messages", async (req, res) => {
         }
 
         //retorna até o número limite de mensagens
-        newData.reverse().splice(limit, newData.length - 1);
+        newData.reverse().splice(limit? limit : newData.length -1, newData.length - 1);
 
         res.send(newData);
     } catch (err) {
