@@ -129,7 +129,7 @@ server.get("/messages", async (req, res) => {
         }
 
         //retorna até o número limite de mensagens
-        newData.reverse().splice(limit? limit : newData.length -1, newData.length - 1);
+        newData.reverse().splice(limit? limit : newData.length -1, newData.length - 1).reverse();
 
         res.send(newData);
     } catch (err) {
