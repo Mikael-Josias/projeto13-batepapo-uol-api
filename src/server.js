@@ -180,6 +180,7 @@ async function deleteUser(){
         for (let i = 0; i < users.length; i++) {
             if ((new Date().getTime() - new Date(users[i].lastStatus).getTime()) / 1000 > 10) {
                 await db.collection("participants").deleteOne({_id: ObjectId(users[i]._id)});
+                await db.collection("messages").insertOne({from: users[i].name, to: 'Todos', text: 'sai da sala...', type: 'status', time: dayjs().format("HH:mm:ss")});
             }
         }
     } catch (err) {
