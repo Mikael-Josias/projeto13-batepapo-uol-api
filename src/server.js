@@ -120,7 +120,7 @@ server.post("/messages", async (req, res) => {
 server.get("/messages", async (req, res) => {
     const {limit} = req.query;
     const {user} = req.headers;
-
+    console.log(limit? true : false);
     if (schemaLimit.validate({limit}).error) return res.status(422).send();
 
     try {
@@ -135,7 +135,7 @@ server.get("/messages", async (req, res) => {
         }
 
         //retorna até o número limite de mensagens
-        newData.reverse().splice(limit? limit : newData.length -1, newData.length - 1).reverse();
+        newData.reverse().splice(limit? limit : newData.length, newData.length).reverse();
 
         res.send(newData);
     } catch (err) {
