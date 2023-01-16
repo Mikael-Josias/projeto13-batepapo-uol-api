@@ -18,6 +18,10 @@ const schemaMessage = Joi.object({
     type: Joi.string().valid("message","private_message").required(),
 });
 
+const schemaLimit = Joi.object({
+    limit: Joi.number().positive().integer(),
+})
+
 //==================== DATABASE ====================\\
 
 const mongoClient = new MongoClient(process.env.DATABASE_URL);
@@ -56,7 +60,7 @@ server.post("/participants", async (req, res) => {
             name,
             lastStatus: Date.now(),
         }
-
+        
         await db.collection("participants").insertOne(newUser);
 
         //cadastra mensagem de entrada
@@ -116,6 +120,8 @@ server.post("/messages", async (req, res) => {
 server.get("/messages", async (req, res) => {
     const {limit} = req.query;
     const {user} = req.headers;
+
+    if (schemaLimit.validate({limit}).error) return res.status(422).send();
 
     try {
         const data = await db.collection("messages").find().toArray();
